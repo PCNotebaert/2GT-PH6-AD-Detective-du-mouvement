@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PH6 - AD - Détective du mouvement</title>
+<style>
+  :root {
+    --bleu:#1F4E79;--bleu2:#2E75B6;--bleu3:#D6E4F0;
+    --rouge:#C00000;--vert:#1E6B2E;--orange:#E67E22;--violet:#7D3C98;
+    --gris:#F4F4F4;--gris2:#DDDDDD;--noir:#1A1A1A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#ECEFF4;color:var(--noir);font-size:15px;}
+
+  header{background:var(--bleu);color:white;padding:12px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+  .header-badge{background:var(--rouge);color:white;font-weight:700;font-size:14px;padding:6px 12px;border-radius:6px;white-space:nowrap;}
+  .header-titles h1{font-size:17px;font-weight:700;line-height:1.2;}
+  .header-titles p{font-size:12px;opacity:0.75;margin-top:2px;}
+
+  .eleve-bar{background:white;border-bottom:2px solid var(--bleu3);padding:10px 20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+  .eleve-bar label{font-size:12px;font-weight:700;color:var(--bleu);white-space:nowrap;}
+  .eleve-bar input{border:none;border-bottom:1.5px solid var(--bleu2);padding:3px 6px;font-size:13px;font-family:inherit;background:transparent;color:var(--noir);width:160px;outline:none;}
+  .eleve-bar input:focus{border-bottom-color:var(--rouge);}
+  .eleve-field{display:flex;align-items:center;gap:6px;}
+
+  .toolbox{margin:14px 20px 0;background:white;border:2px solid var(--bleu2);border-radius:10px;overflow:hidden;}
+  .toolbox-header{background:var(--bleu2);color:white;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;}
+  .toolbox-header:hover{background:var(--bleu);}
+  .toolbox-body{padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;}
+  .toolbox-body.collapsed{display:none;}
+  .def-card{background:var(--gris);border-left:4px solid var(--bleu2);border-radius:6px;padding:10px 12px;}
+  .def-card h4{color:var(--bleu);font-size:13px;margin-bottom:6px;}
+  .def-card p{font-size:13px;line-height:1.6;}
+  .def-card .formula{background:white;border:1px solid var(--gris2);border-radius:4px;padding:6px 10px;margin-top:6px;font-size:13px;text-align:center;}
+
+  .vec{display:inline-block;position:relative;font-style:italic;font-family:'Times New Roman',serif;padding-top:7px;line-height:1;}
+  .vec::before{content:'→';position:absolute;top:-1px;left:50%;transform:translateX(-50%);font-size:0.72em;font-style:normal;line-height:1;}
+  .vec-rouge{color:var(--rouge);font-weight:700;}
+  .vec-vert{color:var(--vert);font-weight:700;}
+  .vec-orange{color:var(--orange);font-weight:700;}
+  .vec-violet{color:var(--violet);font-weight:700;}
+  .vec-bleu{color:var(--bleu);font-weight:700;}
+
+  .tabs-wrapper{margin:14px 20px 0;}
+  .tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;}
+  .tab-btn{background:white;border:2px solid var(--gris2);border-bottom:none;border-radius:8px 8px 0 0;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#666;white-space:nowrap;transition:all .2s;}
+  .tab-btn:hover{background:var(--bleu3);color:var(--bleu);}
+  .tab-btn.active{background:var(--bleu);color:white;border-color:var(--bleu);}
+  .tab-content{background:white;border:2px solid var(--gris2);border-radius:0 8px 8px 8px;padding:20px;display:none;}
+  .tab-content.active{display:block;}
+
+  .situation-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+  .situation-num{background:var(--rouge);color:white;font-weight:700;font-size:20px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .situation-header h2{font-size:17px;color:var(--bleu);margin-bottom:4px;}
+  .situation-header p{font-size:13px;color:#555;line-height:1.5;}
+  .canvas-zone{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+  canvas{border:2px solid var(--gris2);border-radius:8px;background:#F8FBFF;display:block;}
+
+  .controls{display:flex;flex-direction:column;gap:8px;min-width:182px;}
+  .ctrl-section{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+  .btn{border:none;border-radius:6px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+  .btn:hover{opacity:0.85;transform:translateY(-1px);}
+  .btn-play{background:var(--vert);color:white;}
+  .btn-pause{background:var(--orange);color:white;}
+  .btn-reset{background:#888;color:white;}
+  .btn-chrono{background:var(--bleu2);color:white;font-size:12px;}
+  .btn-chrono.on{background:var(--bleu);}
+  .speed-ctrl{display:flex;align-items:center;gap:6px;font-size:12px;}
+  .speed-ctrl input{flex:1;cursor:pointer;}
+  .toggle-group{display:flex;flex-direction:column;gap:5px;}
+  .toggle-btn{border:2px solid;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;background:white;display:flex;align-items:center;gap:5px;}
+  .toggle-btn[data-force="P"]{border-color:#C00000;color:#C00000;}
+  .toggle-btn[data-force="P"].active{background:#C00000;color:white;}
+  .toggle-btn[data-force="R"]{border-color:#1E6B2E;color:#1E6B2E;}
+  .toggle-btn[data-force="R"].active{background:#1E6B2E;color:white;}
+  .toggle-btn[data-force="f"]{border-color:#E67E22;color:#E67E22;}
+  .toggle-btn[data-force="f"].active{background:#E67E22;color:white;}
+  .toggle-btn[data-force="T"]{border-color:#7D3C98;color:#7D3C98;}
+  .toggle-btn[data-force="T"].active{background:#7D3C98;color:white;}
+  .info-box{background:var(--bleu3);border:1px solid var(--bleu2);border-radius:6px;padding:8px 10px;font-size:12px;margin-top:4px;}
+  .info-box strong{color:var(--bleu);display:block;margin-bottom:3px;}
+  .piege-box{background:#FFF8E1;border:2px solid #F0C040;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:6px;line-height:1.5;}
+  .piege-box strong{color:#8B6000;}
+
+  .questions{margin-top:16px;border-top:2px solid var(--bleu3);padding-top:14px;}
+  .q-title{font-size:12px;font-weight:700;color:var(--bleu);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;}
+  .question-block{margin-bottom:10px;}
+  .question{background:var(--gris);border-left:4px solid var(--bleu2);border-radius:0 6px 6px 0;padding:9px 12px;}
+  .question .code{display:inline-block;background:var(--bleu);color:white;font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:5px;}
+  .question p{font-size:13px;line-height:1.5;display:inline;}
+  .answer-field{width:100%;margin-top:4px;padding:7px 10px;border:1.5px solid var(--bleu3);border-radius:0 0 6px 6px;font-family:inherit;font-size:13px;color:var(--noir);background:#FAFCFF;resize:vertical;min-height:54px;outline:none;transition:border-color .15s;}
+  .answer-field:focus{border-color:var(--bleu2);background:white;}
+
+  .nav-bottom{display:flex;justify-content:flex-end;margin-top:14px;gap:8px;}
+  .btn-nav{background:var(--bleu);color:white;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+  .btn-nav:hover{background:var(--bleu2);}
+
+  /* BILAN */
+  .bilan-section{margin:14px 20px 0;background:white;border:2px solid var(--vert);border-radius:10px;overflow:hidden;}
+  .bilan-header{background:var(--vert);color:white;padding:10px 16px;font-weight:700;font-size:14px;}
+  .bilan-body{padding:16px 18px;}
+  .bilan-bloc{margin-bottom:20px;}
+  .bilan-bloc-title{font-size:12px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid #C8E6C9;}
+  .bilan-question-block{margin-bottom:10px;}
+  .bilan-question{background:#F0FAF2;border-left:4px solid var(--vert);border-radius:0 6px 6px 0;padding:9px 12px;}
+  .bilan-question .code{display:inline-block;background:var(--vert);color:white;font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:5px;}
+  .bilan-question p{font-size:13px;line-height:1.5;display:inline;}
+
+  .trous-block{background:#F0FAF2;border:1.5px solid #A5D6A7;border-radius:8px;padding:14px 18px;margin-bottom:14px;font-size:13px;line-height:2.4;}
+  .trou{display:inline-block;border-bottom:2px solid var(--bleu2);min-width:120px;margin:0 3px;vertical-align:bottom;}
+  .trou input{border:none;outline:none;background:transparent;font-family:inherit;font-size:13px;width:120px;color:var(--noir);padding:0 2px;}
+
+  .principe-box{background:#E8F5E9;border:2.5px solid var(--vert);border-radius:10px;padding:16px 20px;margin-top:6px;}
+  .principe-title{font-size:13px;font-weight:700;color:var(--vert);margin-bottom:10px;}
+  .principe-box p{font-size:13px;line-height:1.8;}
+  .principe-box strong{color:var(--vert);}
+
+  /* SYNTHÈSE */
+  .synthese-section{margin:14px 20px 80px;background:white;border:2px solid var(--bleu2);border-radius:10px;overflow:hidden;}
+  .synthese-header{background:var(--bleu);color:white;padding:10px 16px;font-weight:700;font-size:14px;}
+  .synthese-body{padding:14px 16px;overflow-x:auto;}
+  .synthese-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .synthese-table th{background:var(--bleu2);color:white;padding:8px 10px;text-align:left;font-weight:700;border:1px solid var(--bleu);}
+  .synthese-table td{padding:6px 8px;border:1px solid var(--gris2);vertical-align:middle;}
+  .synthese-table tr:nth-child(even) td{background:var(--gris);}
+  .synthese-table tr:hover td{background:var(--bleu3);}
+  .syn-sit{font-weight:700;color:var(--bleu);white-space:nowrap;}
+  .syn-select{border:1.5px solid var(--bleu3);border-radius:4px;padding:4px 6px;font-size:12px;font-family:inherit;background:white;width:100%;outline:none;cursor:pointer;}
+  .syn-select:focus{border-color:var(--bleu2);}
+  .syn-input{border:1.5px solid var(--bleu3);border-radius:4px;padding:4px 6px;font-size:12px;font-family:inherit;background:white;width:100%;outline:none;}
+  .syn-input:focus{border-color:var(--bleu2);}
+
+  .btn-print{position:fixed;bottom:22px;right:22px;background:var(--rouge);color:white;border:none;border-radius:50px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;z-index:999;transition:all .2s;}
+  .btn-print:hover{background:#9A0000;transform:translateY(-2px);}
+
+  @media print {
+    @page{margin:0.5cm;}
+    header,.toolbox,.tabs,.canvas-zone,.nav-bottom,.btn-print,
+    .info-box,.piege-box,.btn-chrono,.btn-reset,.speed-ctrl,
+    .ctrl-section,.toggle-group,.btn-play,.btn-pause{display:none !important;}
+    canvas{display:none !important;}
+    body{background:white;font-size:10pt;color:black;}
+    .eleve-bar{display:flex !important;border:1pt solid #999;border-radius:4pt;padding:5pt 8pt;margin-bottom:6pt;gap:12pt;background:white;}
+    .eleve-bar input{border-bottom:1pt solid black;font-size:10pt;width:110pt;}
+    .eleve-bar label{font-size:9pt;}
+    .tab-content{display:block !important;border:1pt solid #CCC;border-radius:4pt;padding:7pt;margin-bottom:6pt;page-break-inside:unset;}
+    .tabs-wrapper{margin:0;}
+    .situation-header{margin-bottom:5pt;}
+    .situation-num{width:24pt;height:24pt;font-size:12pt;}
+    .situation-header h2{font-size:11pt;}
+    .situation-header p{font-size:9pt;}
+    .questions{margin-top:5pt;padding-top:5pt;}
+    .question-block{margin-bottom:4pt;}
+    .question{padding:4pt 7pt;page-break-inside:avoid;}
+    .question .code{font-size:8pt;padding:1pt 3pt;}
+    .question p{font-size:10pt;}
+    .answer-field{display:block !important;border:1pt solid #999;border-radius:3pt;min-height:24pt;background:#FAFAFA;font-size:10pt;padding:3pt;}
+    .bilan-section{margin:6pt 0;border:1pt solid #1E6B2E;border-radius:4pt;page-break-inside:avoid;}
+    .bilan-header{background:#1E6B2E;color:white;padding:4pt 8pt;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .bilan-body{padding:5pt 8pt;}
+    .bilan-question{padding:3pt 5pt;}
+    .bilan-question p{font-size:10pt;}
+    .trous-block{font-size:10pt;padding:5pt 8pt;}
+    .trou input{font-size:10pt;}
+    .principe-box{border:1.5pt solid #1E6B2E;padding:5pt 8pt;}
+    .principe-box p{font-size:10pt;}
+    .synthese-section{margin:6pt 0 0;border:1pt solid #999;border-radius:4pt;page-break-inside:avoid;}
+    .synthese-header{background:#1F4E79;color:white;padding:4pt 8pt;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .synthese-body{padding:5pt 8pt;}
+    .synthese-table th{background:#2E75B6 !important;color:white !important;font-size:9pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .synthese-table td{font-size:9pt;}
+    .syn-select,.syn-input{border:1pt solid #999;font-size:9pt;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">TP PH6.1</div>
+  <div class="header-titles">
+    <h1>🔍 Détective du mouvement</h1>
+    <p>PH6 - Principe d'inertie - 2nde</p>
+  </div>
+</header>
+
+<div class="eleve-bar">
+  <div class="eleve-field"><label>Nom :</label><input type="text" placeholder="…"></div>
+  <div class="eleve-field"><label>Prénom :</label><input type="text" placeholder="…"></div>
+  <div class="eleve-field"><label>Classe :</label><input type="text" placeholder="2nde …" style="width:90px"></div>
+  <div class="eleve-field"><label>Date :</label><input type="date" style="width:140px"></div>
+</div>
+
+<div class="toolbox">
+  <div class="toolbox-header" onclick="toggleToolbox()">🧰 Boîte à outils - Notions essentielles <span id="toolbox-arrow">▼</span></div>
+  <div class="toolbox-body" id="toolbox-body">
+    <div class="def-card">
+      <h4>📌 Bilan des forces</h4>
+      <p>Lister <strong>toutes</strong> les forces qui s'exercent sur l'objet :</p>
+      <div class="formula"><span class="vec vec-rouge">P</span> + <span class="vec vec-vert">R</span> + <span class="vec vec-orange">f</span> + ...</div>
+      <p style="margin-top:6px">Chaque force = une flèche avec direction, sens et longueur proportionnelle à sa valeur.</p>
+    </div>
+    <div class="def-card">
+      <h4>📌 Somme des forces Σ<span class="vec vec-bleu">F</span></h4>
+      <div class="formula">Σ<span class="vec vec-bleu">F</span> = <span class="vec vec-rouge">P</span> + <span class="vec vec-vert">R</span> + <span class="vec vec-orange">f</span> + ...</div>
+      <p style="margin-top:6px">Forces compensées → <strong>Σ<span class="vec vec-bleu">F</span> = <span class="vec vec-bleu">0</span></strong></p>
+    </div>
+    <div class="def-card">
+      <h4>📌 Types de mouvement</h4>
+      <p><strong>MRU</strong> : droite, vitesse constante.<br><strong>MRA</strong> : droite, vitesse qui change en valeur.<br><strong>MCU</strong> : circulaire, vitesse constante en valeur mais direction variable.</p>
+    </div>
+    <div class="def-card">
+      <h4>📌 Notation</h4>
+      <p>
+        <span class="vec vec-rouge">P</span> : Poids (vers le bas)<br>
+        <span class="vec vec-vert">R</span> : Réaction du support<br>
+        <span class="vec vec-orange">f</span> : Frottements (opposé au mouvement)<br>
+        <span class="vec vec-violet">T</span> : Tension du câble (vers le centre)
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(0)">1 - Palet (glisse)</button>
+    <button class="tab-btn" onclick="showTab(1)">2 - Palet (ralentit)</button>
+    <button class="tab-btn" onclick="showTab(2)">3 - Manège</button>
+    <button class="tab-btn" onclick="showTab(3)">4 - Bille lisse</button>
+    <button class="tab-btn" onclick="showTab(4)">5 - Bille (frottements)</button>
+    <button class="tab-btn" onclick="showTab(5)">6 - Chariot (plan incliné)</button>
+  </div>
+
+  <!-- S1 -->
+  <div class="tab-content active" id="tab-0">
+    <div class="situation-header"><div class="situation-num">1</div><div>
+      <h2>Palet de curling - après le lancer</h2>
+      <p>Le palet glisse sur la glace. Frottements <strong>quasi nuls</strong>. Positions relevées toutes les 0,5 s.</p>
+    </div></div>
+    <div class="canvas-zone">
+      <canvas id="c0" width="560" height="200"></canvas>
+      <div class="controls">
+        <div class="ctrl-section">Animation</div>
+        <button class="btn btn-play" id="play0" onclick="togglePlay(0)">▶ Lancer</button>
+        <button class="btn btn-chrono" id="chrono0" onclick="toggleChrono(0)">📷 Chronophoto</button>
+        <button class="btn btn-reset" onclick="resetAnim(0)">↺ Réinitialiser</button>
+        <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(0,this.value)"><span>🐇</span></div>
+        <div class="ctrl-section" style="margin-top:6px">Forces</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-force="P" onclick="toggleForce(0,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
+          <button class="toggle-btn" data-force="R" onclick="toggleForce(0,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
+          <button class="toggle-btn" data-force="f" onclick="toggleForce(0,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
+        </div>
+        <div class="info-box" id="info0"><strong>En attente</strong>Lance l'animation pour observer.</div>
+      </div>
+    </div>
+    <div class="questions"><div class="q-title">📋 Questions</div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Les espacements sont-ils égaux, croissants ou décroissants ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q2.</strong> Quel type de mouvement est-ce ? Justifie à partir des espacements.</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">REA</span><p><strong>Q3.</strong> Affiche les forces. Les frottements sont-ils présents ? Pourquoi ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">VAL</span><p><strong>Q4.</strong> Les forces <span class="vec vec-rouge" style="font-size:12px">P</span> et <span class="vec vec-vert" style="font-size:12px">R</span> sont-elles compensées ? Σ<span class="vec vec-bleu" style="font-size:12px">F</span> est-elle nulle ou non nulle ? Vers quelle direction pointe-t-elle ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="nav-bottom"><button class="btn-nav" onclick="showTab(1)">Situation suivante →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="tab-content" id="tab-1">
+    <div class="situation-header"><div class="situation-num">2</div><div>
+      <h2>Palet de curling - fin de piste</h2>
+      <p>Le palet <strong>ralentit</strong> sur glace rugueuse. Observe la taille des frottements évoluer. Positions relevées toutes les 0,5 s.</p>
+    </div></div>
+    <div class="canvas-zone">
+      <canvas id="c1" width="560" height="200"></canvas>
+      <div class="controls">
+        <div class="ctrl-section">Animation</div>
+        <button class="btn btn-play" id="play1" onclick="togglePlay(1)">▶ Lancer</button>
+        <button class="btn btn-chrono" id="chrono1" onclick="toggleChrono(1)">📷 Chronophoto</button>
+        <button class="btn btn-reset" onclick="resetAnim(1)">↺ Réinitialiser</button>
+        <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(1,this.value)"><span>🐇</span></div>
+        <div class="ctrl-section" style="margin-top:6px">Forces</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-force="P" onclick="toggleForce(1,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
+          <button class="toggle-btn" data-force="R" onclick="toggleForce(1,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
+          <button class="toggle-btn" data-force="f" onclick="toggleForce(1,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
+        </div>
+        <div class="info-box" id="info1"><strong>En attente</strong>Lance l'animation pour observer.</div>
+      </div>
+    </div>
+    <div class="questions"><div class="q-title">📋 Questions</div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Compare les espacements avec la situation 1. Que remarques-tu ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">REA</span><p><strong>Q2.</strong> Affiche les frottements. Leur taille change-t-elle au cours du mouvement ? Pourquoi ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">VAL</span><p><strong>Q3.</strong> Les forces sont-elles compensées ? Σ<span class="vec vec-bleu" style="font-size:12px">F</span> est-elle nulle ou non nulle ? Si non nulle, vers quelle direction pointe-t-elle ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(0)">← Précédente</button>
+      <button class="btn-nav" onclick="showTab(2)">Situation suivante →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="tab-content" id="tab-2">
+    <div class="situation-header"><div class="situation-num">3</div><div>
+      <h2>Un manège en rotation</h2>
+      <p>Les cabines tournent à <strong>vitesse constante en valeur</strong>. Observe la direction du vecteur vitesse à chaque instant.</p>
+    </div></div>
+    <div class="canvas-zone">
+      <canvas id="c2" width="560" height="320"></canvas>
+      <div class="controls">
+        <div class="ctrl-section">Animation</div>
+        <button class="btn btn-play" id="play2" onclick="togglePlay(2)">▶ Lancer</button>
+        <button class="btn btn-chrono" id="chrono2" onclick="toggleChrono(2)">📷 Chronophoto</button>
+        <button class="btn btn-reset" onclick="resetAnim(2)">↺ Réinitialiser</button>
+        <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(2,this.value)"><span>🐇</span></div>
+        <div class="ctrl-section" style="margin-top:6px">Forces</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-force="P" onclick="toggleForce(2,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
+          <button class="toggle-btn" data-force="T" onclick="toggleForce(2,'T',this)"><span class="vec vec-violet" style="font-size:12px;padding-top:5px">T</span> - Tension</button>
+        </div>
+        <div class="info-box" id="info2"><strong>En attente</strong>Lance l'animation pour observer.</div>
+        <div class="piege-box"><strong>⚠️ Cas piège !</strong><br>La vitesse est constante <em>en valeur</em>… mais sa <em>direction</em> change. Est-ce un MRU ?</div>
+      </div>
+    </div>
+    <div class="questions"><div class="q-title">📋 Questions</div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> La valeur de la vitesse change-t-elle ? Et sa direction ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q2.</strong> Ce mouvement est-il un MRU ? Justifie précisément.</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">VAL</span><p><strong>Q3.</strong> Les forces sont-elles compensées ? Σ<span class="vec vec-bleu" style="font-size:12px">F</span> est-elle nulle ou non nulle ? Vers quelle direction pointe-t-elle ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(1)">← Précédente</button>
+      <button class="btn-nav" onclick="showTab(3)">Situation suivante →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="tab-content" id="tab-3">
+    <div class="situation-header"><div class="situation-num">4</div><div>
+      <h2>Bille sur table lisse</h2>
+      <p>Bille sur table <strong>parfaitement lisse</strong>. Frottements nuls. Positions toutes les 0,4 s.</p>
+    </div></div>
+    <div class="canvas-zone">
+      <canvas id="c3" width="560" height="200"></canvas>
+      <div class="controls">
+        <div class="ctrl-section">Animation</div>
+        <button class="btn btn-play" id="play3" onclick="togglePlay(3)">▶ Lancer</button>
+        <button class="btn btn-chrono" id="chrono3" onclick="toggleChrono(3)">📷 Chronophoto</button>
+        <button class="btn btn-reset" onclick="resetAnim(3)">↺ Réinitialiser</button>
+        <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(3,this.value)"><span>🐇</span></div>
+        <div class="ctrl-section" style="margin-top:6px">Forces</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-force="P" onclick="toggleForce(3,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
+          <button class="toggle-btn" data-force="R" onclick="toggleForce(3,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
+          <button class="toggle-btn" data-force="f" onclick="toggleForce(3,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
+        </div>
+        <div class="info-box" id="info3"><strong>En attente</strong>Lance l'animation pour observer.</div>
+      </div>
+    </div>
+    <div class="questions"><div class="q-title">📋 Questions</div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Compare avec la situation 1. Quelles similitudes ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">REA</span><p><strong>Q2.</strong> Affiche <span class="vec vec-rouge" style="font-size:12px">P</span> et <span class="vec vec-vert" style="font-size:12px">R</span>. Ces deux forces se compensent-elles ? Comment le vois-tu ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">VAL</span><p><strong>Q3.</strong> <span class="vec vec-rouge" style="font-size:12px">P</span> et <span class="vec vec-vert" style="font-size:12px">R</span> se compensent-elles ? Σ<span class="vec vec-bleu" style="font-size:12px">F</span> est-elle nulle ou non nulle ? Vers quelle direction pointe-t-elle ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(2)">← Précédente</button>
+      <button class="btn-nav" onclick="showTab(4)">Situation suivante →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="tab-content" id="tab-4">
+    <div class="situation-header"><div class="situation-num">5</div><div>
+      <h2>Bille sur tapis (avec frottements)</h2>
+      <p>La même bille sur un <strong>tapis rugueux</strong>. Elle ralentit progressivement. Positions toutes les 0,4 s.</p>
+    </div></div>
+    <div class="canvas-zone">
+      <canvas id="c4" width="560" height="200"></canvas>
+      <div class="controls">
+        <div class="ctrl-section">Animation</div>
+        <button class="btn btn-play" id="play4" onclick="togglePlay(4)">▶ Lancer</button>
+        <button class="btn btn-chrono" id="chrono4" onclick="toggleChrono(4)">📷 Chronophoto</button>
+        <button class="btn btn-reset" onclick="resetAnim(4)">↺ Réinitialiser</button>
+        <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(4,this.value)"><span>🐇</span></div>
+        <div class="ctrl-section" style="margin-top:6px">Forces</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-force="P" onclick="toggleForce(4,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
+          <button class="toggle-btn" data-force="R" onclick="toggleForce(4,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
+          <button class="toggle-btn" data-force="f" onclick="toggleForce(4,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
+        </div>
+        <div class="info-box" id="info4"><strong>En attente</strong>Compare avec la situation 4.</div>
+      </div>
+    </div>
+    <div class="questions"><div class="q-title">📋 Questions</div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Compare les espacements avec la situation 4. Que remarques-tu ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">REA</span><p><strong>Q2.</strong> Affiche toutes les forces. Dans quel sens sont orientés les frottements par rapport au mouvement ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">VAL</span><p><strong>Q3.</strong> Les forces se compensent-elles ? Σ<span class="vec vec-bleu" style="font-size:12px">F</span> est-elle nulle ou non nulle ? Si non nulle, vers quelle direction pointe-t-elle ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(3)">← Précédente</button>
+      <button class="btn-nav" onclick="showTab(5)">Situation suivante →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="tab-content" id="tab-5">
+    <div class="situation-header"><div class="situation-num">6</div><div>
+      <h2>Chariot sur plan incliné (sans frottements)</h2>
+      <p>Un chariot glisse sur un plan incliné à <strong>30°</strong>. Pas de frottements. Positions relevées toutes les 0,5 s.</p>
+    </div></div>
+    <div class="canvas-zone">
+      <canvas id="c5" width="560" height="280"></canvas>
+      <div class="controls">
+        <div class="ctrl-section">Animation</div>
+        <button class="btn btn-play" id="play5" onclick="togglePlay(5)">▶ Lancer</button>
+        <button class="btn btn-chrono" id="chrono5" onclick="toggleChrono(5)">📷 Chronophoto</button>
+        <button class="btn btn-reset" onclick="resetAnim(5)">↺ Réinitialiser</button>
+        <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(5,this.value)"><span>🐇</span></div>
+        <div class="ctrl-section" style="margin-top:6px">Forces</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-force="P" onclick="toggleForce(5,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
+          <button class="toggle-btn" data-force="R" onclick="toggleForce(5,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction normale</button>
+        </div>
+        <div class="info-box" id="info5"><strong>En attente</strong>Lance l'animation pour observer.</div>
+      </div>
+    </div>
+    <div class="questions"><div class="q-title">📋 Questions</div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Les espacements sont-ils égaux, croissants ou décroissants ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">APP</span><p><strong>Q2.</strong> Quel type de mouvement est-ce ? Justifie à partir des espacements.</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">REA</span><p><strong>Q3.</strong> Affiche <span class="vec vec-rouge" style="font-size:12px">P</span> et <span class="vec vec-vert" style="font-size:12px">R</span>. Ces deux forces se compensent-elles ? Pourquoi ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="question-block">
+        <div class="question"><span class="code">VAL</span><p><strong>Q4.</strong> Σ<span class="vec vec-bleu" style="font-size:12px">F</span> est-elle nulle ou non nulle ? Vers quelle direction pointe-t-elle ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="nav-bottom"><button class="btn-nav" onclick="showTab(4)">← Précédente</button></div>
+  </div>
+</div>
+
+<!-- BILAN -->
+<div class="bilan-section">
+  <div class="bilan-header">🔎 Bilan - Vers le principe d'inertie</div>
+  <div class="bilan-body">
+
+    <div class="bilan-bloc">
+      <div class="bilan-bloc-title">Quand les forces se compensent…</div>
+      <div class="bilan-question-block">
+        <div class="bilan-question"><span class="code">APP</span><p><strong>Q1.</strong> Dans quelles situations les forces étaient-elles compensées (Σ<span class="vec vec-bleu" style="font-size:12px">F</span> = <span class="vec vec-bleu" style="font-size:12px">0</span>) ? Cite les numéros.</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="bilan-question-block">
+        <div class="bilan-question"><span class="code">APP</span><p><strong>Q2.</strong> Quel type de mouvement avait l'objet dans chacune de ces situations ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="bilan-bloc">
+      <div class="bilan-bloc-title">Quand les forces ne se compensent pas…</div>
+      <div class="bilan-question-block">
+        <div class="bilan-question"><span class="code">APP</span><p><strong>Q3.</strong> Dans quelles situations les forces n'étaient-elles pas compensées (Σ<span class="vec vec-bleu" style="font-size:12px">F</span> ≠ <span class="vec vec-bleu" style="font-size:12px">0</span>) ? Cite les numéros.</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+      <div class="bilan-question-block">
+        <div class="bilan-question"><span class="code">APP</span><p><strong>Q4.</strong> Dans ces situations, la vitesse était-elle constante ? Que lui arrivait-il ?</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="bilan-bloc">
+      <div class="bilan-bloc-title">Généralisation - Complète les phrases</div>
+      <div class="trous-block">
+        Quand les forces se compensent, l'objet est <span class="trou"><input type="text" placeholder="immobile ou…"></span> ou en <span class="trou"><input type="text" placeholder="type de mvt"></span>.<br>
+        Quand les forces ne se compensent pas, la vitesse <span class="trou"><input type="text" placeholder="augmente ou…"></span> ou change de <span class="trou"><input type="text" placeholder="…"></span>.
+      </div>
+      <div class="bilan-question-block">
+        <div class="bilan-question"><span class="code">COM</span><p><strong>Q5.</strong> Énonce en une phrase le lien entre les forces et le mouvement que tu viens de découvrir.</p></div>
+        <textarea class="answer-field" placeholder="Réponse…" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="principe-box">
+      <div class="principe-title">📘 Principe d'inertie</div>
+      <p>
+        Si les forces appliquées à un objet <strong>se compensent</strong> (Σ<span class="vec vec-bleu" style="font-size:12px">F</span> = <span class="vec vec-bleu" style="font-size:12px">0</span>), alors l'objet est <strong>immobile</strong> ou en <strong>mouvement rectiligne uniforme (MRU)</strong>.<br><br>
+        Réciproquement, si l'objet est immobile ou en MRU, alors les forces se compensent.<br><br>
+        Si les forces <strong>ne se compensent pas</strong> (Σ<span class="vec vec-bleu" style="font-size:12px">F</span> ≠ <span class="vec vec-bleu" style="font-size:12px">0</span>), alors la vitesse <strong>change de valeur</strong> ou <strong>change de direction</strong>.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- SYNTHÈSE -->
+<div class="synthese-section">
+  <div class="synthese-header">📊 Tableau de synthèse - Bilan des 6 situations</div>
+  <div class="synthese-body">
+    <table class="synthese-table">
+      <thead>
+        <tr>
+          <th>Situation</th>
+          <th>Type de mouvement</th>
+          <th>Σ<span class="vec vec-bleu" style="font-size:11px;color:white">F</span> nulle ?</th>
+          <th>Direction de Σ<span class="vec vec-bleu" style="font-size:11px;color:white">F</span></th>
+          <th>Remarque</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="syn-sit">1 - Palet (glisse)</td>
+          <td><select class="syn-select"><option value="">- choisir -</option><option>MRU</option><option>MRA (accélération)</option><option>MRA (décélération)</option><option>MCU</option></select></td>
+          <td><select class="syn-select"><option value="">-</option><option>Oui, ΣF = 0</option><option>Non, ΣF ≠ 0</option></select></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+        </tr>
+        <tr>
+          <td class="syn-sit">2 - Palet (ralentit)</td>
+          <td><select class="syn-select"><option value="">- choisir -</option><option>MRU</option><option>MRA (accélération)</option><option>MRA (décélération)</option><option>MCU</option></select></td>
+          <td><select class="syn-select"><option value="">-</option><option>Oui, ΣF = 0</option><option>Non, ΣF ≠ 0</option></select></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+        </tr>
+        <tr>
+          <td class="syn-sit">3 - Manège</td>
+          <td><select class="syn-select"><option value="">- choisir -</option><option>MRU</option><option>MRA (accélération)</option><option>MRA (décélération)</option><option>MCU</option></select></td>
+          <td><select class="syn-select"><option value="">-</option><option>Oui, ΣF = 0</option><option>Non, ΣF ≠ 0</option></select></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+        </tr>
+        <tr>
+          <td class="syn-sit">4 - Bille (table lisse)</td>
+          <td><select class="syn-select"><option value="">- choisir -</option><option>MRU</option><option>MRA (accélération)</option><option>MRA (décélération)</option><option>MCU</option></select></td>
+          <td><select class="syn-select"><option value="">-</option><option>Oui, ΣF = 0</option><option>Non, ΣF ≠ 0</option></select></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+        </tr>
+        <tr>
+          <td class="syn-sit">5 - Bille (tapis)</td>
+          <td><select class="syn-select"><option value="">- choisir -</option><option>MRU</option><option>MRA (accélération)</option><option>MRA (décélération)</option><option>MCU</option></select></td>
+          <td><select class="syn-select"><option value="">-</option><option>Oui, ΣF = 0</option><option>Non, ΣF ≠ 0</option></select></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+        </tr>
+        <tr>
+          <td class="syn-sit">6 - Chariot (plan)</td>
+          <td><select class="syn-select"><option value="">- choisir -</option><option>MRU</option><option>MRA (accélération)</option><option>MRA (décélération)</option><option>MCU</option></select></td>
+          <td><select class="syn-select"><option value="">-</option><option>Oui, ΣF = 0</option><option>Non, ΣF ≠ 0</option></select></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+          <td><input class="syn-input" type="text" placeholder="…"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<button class="btn-print" onclick="window.print()">🖨️ Imprimer</button>
+
+<script>
+function drawVecLabel(ctx,letter,x,y,color,size,sub){
+  size=size||14;ctx.save();ctx.fillStyle=color;ctx.strokeStyle=color;
+  ctx.font=`italic bold ${size}px 'Times New Roman',serif`;
+  const w=ctx.measureText(letter).width;
+  ctx.fillText(letter,x,y);
+  if(sub){ctx.font=`${size*0.75}px 'Times New Roman',serif`;ctx.fillText(sub,x+w+1,y+3);}
+  const cx=x+w/2,fy=y-size+1,hw=Math.max(w*0.65,7);
+  ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(cx-hw/2,fy);ctx.lineTo(cx+hw/2,fy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+hw/2,fy);ctx.lineTo(cx+hw/2-4,fy-2.5);ctx.lineTo(cx+hw/2-4,fy+2.5);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+function drawArrow(ctx,x1,y1,x2,y2,color,lw){
+  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  if(len<5)return;
+  const ux=dx/len,uy=dy/len,hLen=Math.min(11,len*0.38);
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=lw||2;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  ctx.fillStyle=color;
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-hLen*(ux-0.4*uy),y2-hLen*(uy+0.4*ux));
+  ctx.lineTo(x2-hLen*(ux+0.4*uy),y2-hLen*(uy-0.4*ux));
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function drawForceArrow(ctx,ox,oy,dx,dy,color,letter,sub){
+  if(Math.abs(dx)<0.5&&Math.abs(dy)<0.5)return;
+  drawArrow(ctx,ox,oy,ox+dx,oy+dy,color,2.2);
+  const len=Math.sqrt(dx*dx+dy*dy);
+  const nx=-dy/len,ny=dx/len;
+  const ux=dx/len,uy=dy/len;
+  const lx=ox+dx+nx*5+ux*12+(dx>=0?3:-17);
+  const ly=oy+dy+ny*5+uy*12+6;
+  drawVecLabel(ctx,letter,lx,ly,color,13,sub);
+}
+function drawVelocityVector(ctx,ox,oy,vx,vy){
+  const ex=ox+vx,ey=oy+vy;
+  drawArrow(ctx,ox,oy,ex,ey,'#1565C0',2.5);
+  const len=Math.sqrt(vx*vx+vy*vy);if(len<1)return;
+  const ux=vx/len,uy=vy/len;
+  drawVecLabel(ctx,'v',ex+ux*6,ey+uy*6-2,'#1565C0',13);
+}
+function drawPalet(ctx){
+  const W=54,H=22;
+  ctx.save();ctx.fillStyle='rgba(0,0,0,0.12)';
+  ctx.beginPath();ctx.roundRect(-W/2+3,-H/2+5,W,H,8);ctx.fill();ctx.restore();
+  const gf=ctx.createLinearGradient(0,-H/2,0,H/2);
+  gf.addColorStop(0,'#C8C8C8');gf.addColorStop(0.5,'#9E9E9E');gf.addColorStop(1,'#707070');
+  ctx.beginPath();ctx.roundRect(-W/2,-H/2,W,H,8);
+  ctx.fillStyle=gf;ctx.fill();ctx.strokeStyle='#555';ctx.lineWidth=1.2;ctx.stroke();
+  ctx.save();ctx.beginPath();ctx.roundRect(-W/2+6,-H/2+3,W-20,H/2-2,5);
+  ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();ctx.restore();
+}
+function drawBille(ctx){
+  const g=ctx.createRadialGradient(-4,-4,2,0,0,13);
+  g.addColorStop(0,'#EEE');g.addColorStop(1,'#777');
+  ctx.beginPath();ctx.arc(0,0,13,0,2*Math.PI);
+  ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#555';ctx.lineWidth=1.5;ctx.stroke();
+}
+function drawManege(ctx,selfAngle){
+  const R=20;
+  ctx.save();ctx.fillStyle='rgba(0,0,0,0.1)';
+  ctx.beginPath();ctx.ellipse(3,5,R+2,R*0.35,0,0,2*Math.PI);ctx.fill();ctx.restore();
+  const gp=ctx.createRadialGradient(-5,-5,3,0,0,R);
+  gp.addColorStop(0,'#F0D080');gp.addColorStop(1,'#B89030');
+  ctx.beginPath();ctx.arc(0,0,R,0,2*Math.PI);
+  ctx.fillStyle=gp;ctx.fill();ctx.strokeStyle='#7A6020';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,4,0,2*Math.PI);ctx.fillStyle='#444';ctx.fill();
+  const cols=['#E74C3C','#3498DB','#2ECC71','#F39C12'];
+  for(let k=0;k<4;k++){
+    const a=selfAngle+k*Math.PI/2;
+    const bx=Math.cos(a)*(R-6),by=Math.sin(a)*(R-6);
+    ctx.save();ctx.strokeStyle='#999';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(bx,by);ctx.stroke();
+    ctx.translate(bx,by);ctx.rotate(a);
+    ctx.fillStyle=cols[k];ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.roundRect(-4,-5,8,9,2);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#FDE3A7';ctx.beginPath();ctx.arc(0,-2,2.2,0,2*Math.PI);ctx.fill();
+    ctx.restore();
+  }
+}
+function drawChariot(ctx){
+  const W=40,H=20;
+  const gf=ctx.createLinearGradient(0,-H/2,0,H/2);
+  gf.addColorStop(0,'#5B8DD9');gf.addColorStop(1,'#2E5FA3');
+  ctx.beginPath();ctx.roundRect(-W/2,-H/2,W,H,4);
+  ctx.fillStyle=gf;ctx.fill();ctx.strokeStyle='#1A3A6A';ctx.lineWidth=1.2;ctx.stroke();
+  ctx.save();ctx.beginPath();ctx.roundRect(-W/2+4,-H/2+3,W-14,H/2-3,3);
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fill();ctx.restore();
+  const wheelY=H/2+2,wheelR=6;
+  [-W/2+9,W/2-9].forEach(wx=>{
+    ctx.beginPath();ctx.arc(wx,wheelY,wheelR,0,2*Math.PI);
+    ctx.fillStyle='#222';ctx.fill();ctx.strokeStyle='#555';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(wx,wheelY,wheelR-3,0,2*Math.PI);
+    ctx.strokeStyle='#888';ctx.lineWidth=1;ctx.stroke();
+  });
+}
+const CONFIGS=[
+  {type:'linear',shape:'palet',x0:60,y:117,vx:110,ax:0,v0:110,fMax:0,
+   forces:{P:{dy:40},R:{dy:-40}},surfaceY:128,surface:'glace (frottements ≈ 0)',
+   surfaceColor:'#B0D4F0',bg:'#F0F8FF',objHalfW:27,
+   infoMoving:'Espacements <strong>égaux</strong> → vitesse constante → <strong>MRU</strong>'},
+  {type:'linear',shape:'palet',x0:60,y:117,vx:140,ax:-52,v0:140,fMax:50,
+   forces:{P:{dy:40},R:{dy:-40}},surfaceY:128,surface:'glace rugueuse',
+   surfaceColor:'#C4A07A',bg:'#FFF8F0',objHalfW:27,
+   infoMoving:'Espacements <strong>décroissants</strong> → vitesse diminue → <strong>MRA</strong>'},
+  {type:'circular',shape:'manege',cx:280,cy:158,r:108,omega:0.82,theta0:Math.PI,
+   forces:{P:{dy:30},T:'centripetal'},bg:'#F5F5F5',
+   infoMoving:'Vitesse constante en valeur, direction change → <strong>MCU</strong>'},
+  {type:'linear',shape:'bille',x0:45,y:110,vx:100,ax:0,v0:100,fMax:0,
+   forces:{P:{dy:36},R:{dy:-36}},surfaceY:123,surface:'table lisse',
+   surfaceColor:'#C8B560',bg:'#F8F8F0',objHalfW:13,
+   infoMoving:'Espacements <strong>égaux</strong> → vitesse constante → <strong>MRU</strong>'},
+  {type:'linear',shape:'bille',x0:45,y:110,vx:130,ax:-58,v0:130,fMax:50,
+   forces:{P:{dy:36},R:{dy:-36}},surfaceY:123,surface:'tapis rugueux',
+   surfaceColor:'#8B6040',bg:'#F5F0EC',objHalfW:13,
+   infoMoving:'Espacements <strong>décroissants</strong> → vitesse diminue → <strong>MRA</strong>'},
+  {type:'inclined',shape:'chariot',angle:30,v0:0,a:40,vScale:0.35,
+   bg:'#F0F4F8',surfaceColor:'#8B7355',forces:{P:{mag:52},R:{mag:45}},
+   infoMoving:'Espacements <strong>croissants</strong> → vitesse augmente → <strong>MRA</strong>'},
+];
+const STATE=CONFIGS.map(()=>({
+  t:0,playing:false,speed:1,chrono:false,chronoPoints:[],
+  forces:{P:false,R:false,f:false,T:false},
+  raf:null,lastTs:null,started:false,stopped:false,
+}));
+function drawScene(i){
+  const cfg=CONFIGS[i],st=STATE[i];
+  const can=document.getElementById('c'+i);
+  const ctx=can.getContext('2d');
+  ctx.clearRect(0,0,can.width,can.height);
+  ctx.fillStyle=cfg.bg||'#F8FBFF';ctx.fillRect(0,0,can.width,can.height);
+  if(!st.started){
+    if(cfg.type==='inclined')drawInclined(i,ctx,cfg,st,can);
+    else if(cfg.type==='linear'&&cfg.surfaceY)drawSurface(ctx,cfg,can);
+    else if(cfg.type==='circular')drawCircleGuide(ctx,cfg);
+    ctx.fillStyle='#999';ctx.font='14px Arial';ctx.textAlign='center';
+    ctx.fillText('▶ Lance l\'animation pour commencer',can.width/2,cfg.type==='inclined'?20:can.height/2);
+    ctx.textAlign='left';return;
+  }
+  if(cfg.type==='linear')drawLinear(i,ctx,cfg,st,can);
+  else if(cfg.type==='circular')drawCircular(i,ctx,cfg,st,can);
+  else drawInclined(i,ctx,cfg,st,can);
+}
+function drawSurface(ctx,cfg,can){
+  ctx.fillStyle=cfg.surfaceColor;ctx.fillRect(0,cfg.surfaceY,can.width,can.height-cfg.surfaceY);
+  ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='11px Arial';
+  ctx.fillText(cfg.surface,8,cfg.surfaceY+14);
+}
+function drawCircleGuide(ctx,cfg){
+  ctx.strokeStyle='#CCC';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.arc(cfg.cx,cfg.cy,cfg.r,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
+}
+function drawLinear(i,ctx,cfg,st,can){
+  drawSurface(ctx,cfg,can);
+  const t=st.t,rawV=cfg.vx+cfg.ax*t,v=Math.max(rawV,0);
+  const x=cfg.x0+cfg.vx*t+0.5*cfg.ax*t*t,y=cfg.y;
+  if(st.chrono){
+    st.chronoPoints.forEach(pt=>{
+      ctx.save();ctx.globalAlpha=0.28;ctx.translate(pt.x,y);
+      if(cfg.shape==='palet')drawPalet(ctx);else drawBille(ctx);
+      ctx.restore();
+      ctx.fillStyle='#C00000';ctx.beginPath();ctx.arc(pt.x,y,3,0,2*Math.PI);ctx.fill();
+    });
+  }
+  ctx.save();ctx.translate(x,y);
+  if(cfg.shape==='palet')drawPalet(ctx);else drawBille(ctx);
+  ctx.restore();
+  if(v>3){const vLen=Math.max(v*0.4,16);drawVelocityVector(ctx,x,y,vLen,0);}
+  if(st.forces['P'])drawForceArrow(ctx,x,y,0,cfg.forces.P.dy,'#C00000','P');
+  if(st.forces['R'])drawForceArrow(ctx,x,y,0,cfg.forces.R.dy,'#1E6B2E','R');
+  if(st.forces['f']){
+    if(cfg.fMax===0){
+      // Afficher "f = 0" décalé à gauche pour ne pas gêner R
+      const lx=x-68,ly=y-52;
+      ctx.save();ctx.fillStyle='rgba(255,255,255,0.88)';ctx.fillRect(lx-4,ly-16,72,22);ctx.restore();
+      // f avec flèche
+      drawVecLabel(ctx,'f',lx,ly,'#E67E22',13);
+      // " = " en texte simple
+      ctx.fillStyle='#E67E22';ctx.font='bold 13px Arial';ctx.fillText(' = ',lx+14,ly);
+      // 0 avec flèche via drawVecLabel
+      drawVecLabel(ctx,'0',lx+36,ly,'#E67E22',13);
+    }else if(v>1){
+      const ratio=v/cfg.v0;
+      // Flèche frottements plus épaisse et plus longue pour visibilité
+      const fLen=cfg.fMax*ratio;
+      drawArrow(ctx,x,y,x-fLen,y,'#E67E22',3);
+      // Label avec drawVecLabel
+      const lx=x-fLen-18,ly=y+5;
+      ctx.save();ctx.fillStyle='rgba(255,255,255,0.75)';ctx.fillRect(lx-2,ly-16,18,20);ctx.restore();
+      drawVecLabel(ctx,'f',lx,ly,'#E67E22',13);
+    }
+  }
+  updateInfo(i,st);
+}
+function drawCircular(i,ctx,cfg,st,can){
+  drawCircleGuide(ctx,cfg);
+  const theta=cfg.theta0+cfg.omega*st.t;
+  const x=cfg.cx+cfg.r*Math.cos(theta),y=cfg.cy+cfg.r*Math.sin(theta);
+  const selfAngle=cfg.omega*st.t*2.5;
+  if(st.chrono){
+    st.chronoPoints.forEach(pt=>{
+      ctx.save();ctx.globalAlpha=0.28;ctx.translate(pt.x,pt.y);
+      drawManege(ctx,pt.sa||0);ctx.restore();
+      ctx.fillStyle='#C00000';ctx.beginPath();ctx.arc(pt.x,pt.y,3,0,2*Math.PI);ctx.fill();
+    });
+  }
+  ctx.save();ctx.translate(x,y);drawManege(ctx,selfAngle);ctx.restore();
+  const spd=cfg.r*cfg.omega;
+  const tvx=-Math.sin(theta)*spd*0.46,tvy=Math.cos(theta)*spd*0.46;
+  drawVelocityVector(ctx,x,y,tvx,tvy);
+  if(st.forces['P'])drawForceArrow(ctx,x,y,0,cfg.forces.P.dy,'#C00000','P');
+  if(st.forces['T']){
+    const fcx=cfg.cx-x,fcy=cfg.cy-y,len=Math.sqrt(fcx*fcx+fcy*fcy);
+    drawForceArrow(ctx,x,y,fcx*44/len,fcy*44/len,'#7D3C98','T');
+  }
+  updateInfo(i,st);
+}
+function drawInclined(i,ctx,cfg,st,can){
+  const W=can.width,H=can.height;
+  const angleRad=cfg.angle*Math.PI/180,cosA=Math.cos(angleRad),sinA=Math.sin(angleRad);
+  ctx.fillStyle=cfg.bg;ctx.fillRect(0,0,W,H);
+  const planX1=W-40,planY1=H-45,planLen=W-80;
+  const planX0=planX1-planLen*cosA,planY0=planY1-planLen*sinA;
+  const thick=14;
+  ctx.beginPath();ctx.moveTo(planX0,planY0);ctx.lineTo(planX1,planY1);
+  ctx.lineTo(planX1,planY1+thick);ctx.lineTo(planX0+thick*sinA,planY0+thick*cosA);
+  ctx.closePath();ctx.fillStyle=cfg.surfaceColor;ctx.fill();
+  ctx.strokeStyle='#5A4020';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='#C8B888';ctx.fillRect(0,planY1+thick,W,H-planY1-thick);
+  ctx.strokeStyle='#A09060';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,planY1+thick);ctx.lineTo(W,planY1+thick);ctx.stroke();
+  ctx.save();ctx.beginPath();
+  ctx.moveTo(planX0,planY0+thick*cosA);ctx.lineTo(planX0,planY1+thick);ctx.lineTo(planX1,planY1+thick);
+  ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+  ctx.save();ctx.translate(planX1,planY1+thick);
+  ctx.strokeStyle='#444';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(0,0,30,-Math.PI,-Math.PI+angleRad);ctx.stroke();
+  ctx.font='bold 11px Arial';ctx.fillStyle='#333';ctx.textAlign='right';
+  ctx.fillText('30°',-6,-8);ctx.restore();
+  const s=cfg.v0*st.t+0.5*cfg.a*st.t*st.t;
+  const surfX=planX0+(30+s)*cosA,surfY=planY0+(30+s)*sinA;
+  const lift=16,charX=surfX+sinA*lift,charY=surfY-cosA*lift;
+  if(st.chrono){
+    st.chronoPoints.forEach(pt=>{
+      ctx.save();ctx.globalAlpha=0.28;ctx.translate(pt.charX,pt.charY);ctx.rotate(angleRad);
+      drawChariot(ctx);ctx.restore();
+      ctx.fillStyle='#C00000';ctx.beginPath();ctx.arc(pt.charX,pt.charY,3,0,2*Math.PI);ctx.fill();
+    });
+  }
+  ctx.save();ctx.translate(charX,charY);ctx.rotate(angleRad);drawChariot(ctx);ctx.restore();
+  const v=cfg.v0+cfg.a*st.t;
+  if(v>0.5){const vLen=Math.max(v*cfg.vScale,12);drawVelocityVector(ctx,charX,charY,cosA*vLen,sinA*vLen);}
+  if(st.forces['P'])drawForceArrow(ctx,charX,charY,0,cfg.forces.P.mag,'#C00000','P');
+  if(st.forces['R'])drawForceArrow(ctx,charX,charY,sinA*cfg.forces.R.mag,-cosA*cfg.forces.R.mag,'#1E6B2E','R');
+  updateInfo(i,st);
+}
+function updateInfo(i,st){
+  const cfg=CONFIGS[i],el=document.getElementById('info'+i);
+  if(!el)return;
+  if(st.stopped){el.innerHTML='<strong>Terminé</strong>Réinitialise pour recommencer.';return;}
+  el.innerHTML='<strong>En direct</strong>'+cfg.infoMoving;
+}
+function loop(i,ts){
+  const st=STATE[i],cfg=CONFIGS[i];
+  if(!st.playing)return;
+  if(st.lastTs===null)st.lastTs=ts;
+  const dt=Math.min((ts-st.lastTs)/1000,0.05)*st.speed;
+  st.lastTs=ts;st.t+=dt;
+  const tPrev=st.t-dt;
+  if(Math.floor(st.t/0.5)>Math.floor(tPrev/0.5)&&st.chrono){
+    const tSnap=Math.floor(st.t/0.5)*0.5;
+    if(cfg.type==='linear'){
+      const xs=cfg.x0+cfg.vx*tSnap+0.5*cfg.ax*tSnap*tSnap;
+      if(cfg.vx+cfg.ax*tSnap>=0)st.chronoPoints.push({x:xs});
+    }else if(cfg.type==='circular'){
+      const th=cfg.theta0+cfg.omega*tSnap;
+      st.chronoPoints.push({x:cfg.cx+cfg.r*Math.cos(th),y:cfg.cy+cfg.r*Math.sin(th),sa:cfg.omega*tSnap*2.5});
+    }else if(cfg.type==='inclined'){
+      const angleRad=cfg.angle*Math.PI/180,cosA=Math.cos(angleRad),sinA=Math.sin(angleRad);
+      const can=document.getElementById('c'+i);
+      const planX1=can.width-40,planY1=can.height-45,planLen=can.width-80;
+      const planX0=planX1-planLen*cosA,planY0=planY1-planLen*sinA;
+      const sSnap=cfg.v0*tSnap+0.5*cfg.a*tSnap*tSnap;
+      const surfXs=planX0+(30+sSnap)*cosA,surfYs=planY0+(30+sSnap)*sinA;
+      st.chronoPoints.push({charX:surfXs+sinA*16,charY:surfYs-cosA*16});
+    }
+  }
+  drawScene(i);
+  let stop=false;
+  if(cfg.type==='linear'){
+    const x=cfg.x0+cfg.vx*st.t+0.5*cfg.ax*st.t*st.t;
+    const v=cfg.vx+cfg.ax*st.t;
+    const can=document.getElementById('c'+i);
+    if(x>can.width-55||v<=0)stop=true;
+  }else if(cfg.type==='circular'){
+    if(st.t>11)stop=true;
+  }else if(cfg.type==='inclined'){
+    const can=document.getElementById('c'+i);
+    const s=cfg.v0*st.t+0.5*cfg.a*st.t*st.t;
+    if(30+s>can.width-80-60)stop=true;
+  }
+  if(stop){
+    st.playing=false;st.stopped=true;
+    const btn=document.getElementById('play'+i);
+    btn.textContent='▶ Relancer';btn.className='btn btn-play';
+    drawScene(i);
+  }else{st.raf=requestAnimationFrame(ts2=>loop(i,ts2));}
+}
+function togglePlay(i){
+  const st=STATE[i],btn=document.getElementById('play'+i);
+  if(st.stopped){resetAnim(i);return;}
+  if(st.playing){
+    st.playing=false;st.lastTs=null;cancelAnimationFrame(st.raf);
+    btn.textContent='▶ Continuer';btn.className='btn btn-play';
+  }else{
+    st.started=true;st.playing=true;st.lastTs=null;
+    btn.textContent='⏸ Pause';btn.className='btn btn-pause';
+    st.raf=requestAnimationFrame(ts=>loop(i,ts));
+  }
+}
+function resetAnim(i){
+  const st=STATE[i];cancelAnimationFrame(st.raf);
+  st.playing=false;st.t=0;st.lastTs=null;st.chronoPoints=[];st.started=false;st.stopped=false;
+  document.getElementById('play'+i).textContent='▶ Lancer';
+  document.getElementById('play'+i).className='btn btn-play';
+  drawScene(i);
+}
+function toggleChrono(i){
+  const st=STATE[i];st.chrono=!st.chrono;
+  if(!st.chrono)st.chronoPoints=[];
+  document.getElementById('chrono'+i).classList.toggle('on',st.chrono);
+  if(!st.playing)drawScene(i);
+}
+function setSpeed(i,v){STATE[i].speed=parseFloat(v);}
+function toggleForce(i,f,btn){
+  STATE[i].forces[f]=!STATE[i].forces[f];
+  btn.classList.toggle('active',STATE[i].forces[f]);
+  if(!STATE[i].playing)drawScene(i);
+}
+function showTab(idx){
+  document.querySelectorAll('.tab-content').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+}
+let toolboxOpen=true;
+function toggleToolbox(){
+  toolboxOpen=!toolboxOpen;
+  document.getElementById('toolbox-body').classList.toggle('collapsed',!toolboxOpen);
+  document.getElementById('toolbox-arrow').textContent=toolboxOpen?'▼':'▶';
+}
+window.onload=()=>{for(let i=0;i<6;i++)drawScene(i);};
+</script>
+</body>
+</html>

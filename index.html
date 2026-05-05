@@ -31,7 +31,7 @@
   .toolbox-body.collapsed{display:none;}
   .def-card{background:var(--gris);border-left:4px solid var(--bleu2);border-radius:6px;padding:10px 12px;}
   .def-card h4{color:var(--bleu);font-size:13px;margin-bottom:6px;}
-  .def-card p{font-size:13px;line-height:1.6;}
+  .def-card p{font-size:13px;line-height:1.6;text-align:justify;}
   .def-card .formula{background:white;border:1px solid var(--gris2);border-radius:4px;padding:6px 10px;margin-top:6px;font-size:13px;text-align:center;}
 
   .vec{display:inline-block;position:relative;font-style:italic;font-family:'Times New Roman',serif;padding-top:7px;line-height:1;}
@@ -78,6 +78,7 @@
   .toggle-btn[data-force="f"].active{background:#E67E22;color:white;}
   .toggle-btn[data-force="T"]{border-color:#7D3C98;color:#7D3C98;}
   .toggle-btn[data-force="T"].active{background:#7D3C98;color:white;}
+  .toggle-btn.active span{color:white !important;}
   .info-box{background:var(--bleu3);border:1px solid var(--bleu2);border-radius:6px;padding:8px 10px;font-size:12px;margin-top:4px;}
   .info-box strong{color:var(--bleu);display:block;margin-bottom:3px;}
   .piege-box{background:#FFF8E1;border:2px solid #F0C040;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:6px;line-height:1.5;}
@@ -224,7 +225,7 @@
     </div>
     <div class="def-card">
       <h4>📌 Types de mouvement</h4>
-      <p><strong>MRU</strong> : droite, vitesse constante.<br><strong>MRA</strong> : droite, vitesse qui change en valeur.<br><strong>MCU</strong> : circulaire, vitesse constante en valeur mais direction variable.</p>
+      <p><strong>MRU</strong> : la trajectoir est une droite, la valeur de la vitesse est constante.<br><strong>MRA</strong> : la trajectoire est une doite, la valeur de la vitesse change.<br><strong>MCU</strong> : la trajectoire est un cercle, la valeur de la vitesse est constante mais sa direction est variable.</p>
     </div>
     <div class="def-card">
       <h4>📌 Notation</h4>
@@ -232,7 +233,7 @@
         <span class="vec vec-rouge">P</span> : Poids (vers le bas)<br>
         <span class="vec vec-vert">R</span> : Réaction du support<br>
         <span class="vec vec-orange">f</span> : Frottements (opposé au mouvement)<br>
-        <span class="vec vec-violet">T</span> : Tension du câble (vers le centre)
+        <span class="vec vec-violet">T</span> : Tension du câble
       </p>
     </div>
   </div>

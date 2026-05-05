@@ -31,7 +31,7 @@
   .toolbox-body.collapsed{display:none;}
   .def-card{background:var(--gris);border-left:4px solid var(--bleu2);border-radius:6px;padding:10px 12px;}
   .def-card h4{color:var(--bleu);font-size:13px;margin-bottom:6px;}
-  .def-card p{font-size:13px;line-height:1.6;text-align:justify;}
+  .def-card p{font-size:13px;line-height:1.6;}
   .def-card .formula{background:white;border:1px solid var(--gris2);border-radius:4px;padding:6px 10px;margin-top:6px;font-size:13px;text-align:center;}
 
   .vec{display:inline-block;position:relative;font-style:italic;font-family:'Times New Roman',serif;padding-top:7px;line-height:1;}
@@ -79,8 +79,8 @@
   .toggle-btn[data-force="T"]{border-color:#7D3C98;color:#7D3C98;}
   .toggle-btn[data-force="T"].active{background:#7D3C98;color:white;}
   .toggle-btn.active span{color:white !important;}
-  .info-box{background:var(--bleu3);border:1px solid var(--bleu2);border-radius:6px;padding:8px 10px;font-size:12px;margin-top:4px;}
-  .info-box strong{color:var(--bleu);display:block;margin-bottom:3px;}
+  .info-box{background:var(--bleu3);border:1px solid var(--bleu2);border-radius:6px;padding:8px 10px;font-size:12px;margin-top:4px;white-space:nowrap;}
+  .info-box strong{color:var(--bleu);display:inline;}
   .piege-box{background:#FFF8E1;border:2px solid #F0C040;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:6px;line-height:1.5;}
   .piege-box strong{color:#8B6000;}
 
@@ -260,7 +260,7 @@
       <div class="controls">
         <div class="ctrl-section">Animation</div>
         <button class="btn btn-play" id="play0" onclick="togglePlay(0)">▶ Lancer</button>
-        <button class="btn btn-chrono" id="chrono0" onclick="toggleChrono(0)">📷 Chronophoto</button>
+        <button class="btn btn-chrono" id="chrono0" onclick="toggleChrono(0)">📷 Chronophotographie</button>
         <button class="btn btn-reset" onclick="resetAnim(0)">↺ Réinitialiser</button>
         <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(0,this.value)"><span>🐇</span></div>
         <div class="ctrl-section" style="margin-top:6px">Forces</div>
@@ -269,12 +269,12 @@
           <button class="toggle-btn" data-force="R" onclick="toggleForce(0,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
           <button class="toggle-btn" data-force="f" onclick="toggleForce(0,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
         </div>
-        <div class="info-box" id="info0"><strong>En attente</strong>Lance l'animation pour observer.</div>
+        <div class="info-box" id="info0"><strong>En attente</strong><br>Lance l'animation pour observer.</div>
       </div>
     </div>
     <div class="questions"><div class="q-title">📋 Questions</div>
       <div class="question-block">
-        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Les espacements sont-ils égaux, croissants ou décroissants ?</p></div>
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophotographie. Les espacements sont-ils égaux, croissants ou décroissants ?</p></div>
         <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
       </div>
       <div class="question-block">
@@ -304,7 +304,7 @@
       <div class="controls">
         <div class="ctrl-section">Animation</div>
         <button class="btn btn-play" id="play1" onclick="togglePlay(1)">▶ Lancer</button>
-        <button class="btn btn-chrono" id="chrono1" onclick="toggleChrono(1)">📷 Chronophoto</button>
+        <button class="btn btn-chrono" id="chrono1" onclick="toggleChrono(1)">📷 Chronophotographie</button>
         <button class="btn btn-reset" onclick="resetAnim(1)">↺ Réinitialiser</button>
         <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(1,this.value)"><span>🐇</span></div>
         <div class="ctrl-section" style="margin-top:6px">Forces</div>
@@ -313,12 +313,12 @@
           <button class="toggle-btn" data-force="R" onclick="toggleForce(1,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
           <button class="toggle-btn" data-force="f" onclick="toggleForce(1,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
         </div>
-        <div class="info-box" id="info1"><strong>En attente</strong>Lance l'animation pour observer.</div>
+        <div class="info-box" id="info1"><strong>En attente</strong><br>Lance l'animation pour observer.</div>
       </div>
     </div>
     <div class="questions"><div class="q-title">📋 Questions</div>
       <div class="question-block">
-        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Compare les espacements avec la situation 1. Que remarques-tu ?</p></div>
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophotographie. Compare les espacements avec la situation 1. Que remarques-tu ?</p></div>
         <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
       </div>
       <div class="question-block">
@@ -347,7 +347,7 @@
       <div class="controls">
         <div class="ctrl-section">Animation</div>
         <button class="btn btn-play" id="play2" onclick="togglePlay(2)">▶ Lancer</button>
-        <button class="btn btn-chrono" id="chrono2" onclick="toggleChrono(2)">📷 Chronophoto</button>
+        <button class="btn btn-chrono" id="chrono2" onclick="toggleChrono(2)">📷 Chronophotographie</button>
         <button class="btn btn-reset" onclick="resetAnim(2)">↺ Réinitialiser</button>
         <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(2,this.value)"><span>🐇</span></div>
         <div class="ctrl-section" style="margin-top:6px">Forces</div>
@@ -355,7 +355,7 @@
           <button class="toggle-btn" data-force="P" onclick="toggleForce(2,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
           <button class="toggle-btn" data-force="T" onclick="toggleForce(2,'T',this)"><span class="vec vec-violet" style="font-size:12px;padding-top:5px">T</span> - Tension</button>
         </div>
-        <div class="info-box" id="info2"><strong>En attente</strong>Lance l'animation pour observer.</div>
+        <div class="info-box" id="info2"><strong>En attente</strong><br>Lance l'animation pour observer.</div>
         <div class="piege-box"><strong>⚠️ Cas piège !</strong><br>La vitesse est constante <em>en valeur</em>… mais sa <em>direction</em> change. Est-ce un MRU ?</div>
       </div>
     </div>
@@ -390,7 +390,7 @@
       <div class="controls">
         <div class="ctrl-section">Animation</div>
         <button class="btn btn-play" id="play3" onclick="togglePlay(3)">▶ Lancer</button>
-        <button class="btn btn-chrono" id="chrono3" onclick="toggleChrono(3)">📷 Chronophoto</button>
+        <button class="btn btn-chrono" id="chrono3" onclick="toggleChrono(3)">📷 Chronophotographie</button>
         <button class="btn btn-reset" onclick="resetAnim(3)">↺ Réinitialiser</button>
         <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(3,this.value)"><span>🐇</span></div>
         <div class="ctrl-section" style="margin-top:6px">Forces</div>
@@ -399,7 +399,7 @@
           <button class="toggle-btn" data-force="R" onclick="toggleForce(3,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
           <button class="toggle-btn" data-force="f" onclick="toggleForce(3,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
         </div>
-        <div class="info-box" id="info3"><strong>En attente</strong>Lance l'animation pour observer.</div>
+        <div class="info-box" id="info3"><strong>En attente</strong><br>Lance l'animation pour observer.</div>
       </div>
     </div>
     <div class="questions"><div class="q-title">📋 Questions</div>
@@ -433,7 +433,7 @@
       <div class="controls">
         <div class="ctrl-section">Animation</div>
         <button class="btn btn-play" id="play4" onclick="togglePlay(4)">▶ Lancer</button>
-        <button class="btn btn-chrono" id="chrono4" onclick="toggleChrono(4)">📷 Chronophoto</button>
+        <button class="btn btn-chrono" id="chrono4" onclick="toggleChrono(4)">📷 Chronophotographie</button>
         <button class="btn btn-reset" onclick="resetAnim(4)">↺ Réinitialiser</button>
         <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(4,this.value)"><span>🐇</span></div>
         <div class="ctrl-section" style="margin-top:6px">Forces</div>
@@ -442,12 +442,12 @@
           <button class="toggle-btn" data-force="R" onclick="toggleForce(4,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction</button>
           <button class="toggle-btn" data-force="f" onclick="toggleForce(4,'f',this)"><span class="vec vec-orange" style="font-size:12px;padding-top:5px">f</span> - Frottements</button>
         </div>
-        <div class="info-box" id="info4"><strong>En attente</strong>Compare avec la situation 4.</div>
+        <div class="info-box" id="info4"><strong>En attente</strong><br>Compare avec la situation 4.</div>
       </div>
     </div>
     <div class="questions"><div class="q-title">📋 Questions</div>
       <div class="question-block">
-        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Compare les espacements avec la situation 4. Que remarques-tu ?</p></div>
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophotographie. Compare les espacements avec la situation 4. Que remarques-tu ?</p></div>
         <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
       </div>
       <div class="question-block">
@@ -476,7 +476,7 @@
       <div class="controls">
         <div class="ctrl-section">Animation</div>
         <button class="btn btn-play" id="play5" onclick="togglePlay(5)">▶ Lancer</button>
-        <button class="btn btn-chrono" id="chrono5" onclick="toggleChrono(5)">📷 Chronophoto</button>
+        <button class="btn btn-chrono" id="chrono5" onclick="toggleChrono(5)">📷 Chronophotographie</button>
         <button class="btn btn-reset" onclick="resetAnim(5)">↺ Réinitialiser</button>
         <div class="speed-ctrl"><span>🐢</span><input type="range" min="0.3" max="2" step="0.1" value="1" oninput="setSpeed(5,this.value)"><span>🐇</span></div>
         <div class="ctrl-section" style="margin-top:6px">Forces</div>
@@ -484,12 +484,12 @@
           <button class="toggle-btn" data-force="P" onclick="toggleForce(5,'P',this)"><span class="vec vec-rouge" style="font-size:12px;padding-top:5px">P</span> - Poids</button>
           <button class="toggle-btn" data-force="R" onclick="toggleForce(5,'R',this)"><span class="vec vec-vert" style="font-size:12px;padding-top:5px">R</span> - Réaction normale</button>
         </div>
-        <div class="info-box" id="info5"><strong>En attente</strong>Lance l'animation pour observer.</div>
+        <div class="info-box" id="info5"><strong>En attente</strong><br>Lance l'animation pour observer.</div>
       </div>
     </div>
     <div class="questions"><div class="q-title">📋 Questions</div>
       <div class="question-block">
-        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophoto. Les espacements sont-ils égaux, croissants ou décroissants ?</p></div>
+        <div class="question"><span class="code">APP</span><p><strong>Q1.</strong> Active la chronophotographie. Les espacements sont-ils égaux, croissants ou décroissants ?</p></div>
         <textarea class="answer-field" placeholder="Réponse…" rows="2"></textarea>
       </div>
       <div class="question-block">
@@ -725,25 +725,25 @@ const CONFIGS=[
   {type:'linear',shape:'palet',x0:60,y:117,vx:110,ax:0,v0:110,fMax:0,
    forces:{P:{dy:40},R:{dy:-40}},surfaceY:128,surface:'glace (frottements ≈ 0)',
    surfaceColor:'#B0D4F0',bg:'#F0F8FF',objHalfW:27,
-   infoMoving:'Espacements <strong>égaux</strong> → vitesse constante → <strong>MRU</strong>'},
+   infoMoving:'La trajectoire est une droite.<BR>Espacements <strong>égaux</strong> → valeur de la vitesse constante → <strong>MRU</strong>'},
   {type:'linear',shape:'palet',x0:60,y:117,vx:140,ax:-52,v0:140,fMax:50,
    forces:{P:{dy:40},R:{dy:-40}},surfaceY:128,surface:'glace rugueuse',
    surfaceColor:'#C4A07A',bg:'#FFF8F0',objHalfW:27,
-   infoMoving:'Espacements <strong>décroissants</strong> → vitesse diminue → <strong>MRA</strong>'},
+   infoMoving:'La trajectoire est une droite.<BR>Espacements <strong>décroissants</strong> → la valeur de la vitesse diminue → <strong>MRA</strong>'},
   {type:'circular',shape:'manege',cx:280,cy:158,r:108,omega:0.82,theta0:Math.PI,
    forces:{P:{dy:30},T:'centripetal'},bg:'#F5F5F5',
-   infoMoving:'Vitesse constante en valeur, direction change → <strong>MCU</strong>'},
+   infoMoving:'La trajectoire est un cercle.<BR>La valeur de la vitesse est constante mais sa direction change → <strong>MCU</strong>'},
   {type:'linear',shape:'bille',x0:45,y:110,vx:100,ax:0,v0:100,fMax:0,
    forces:{P:{dy:36},R:{dy:-36}},surfaceY:123,surface:'table lisse',
    surfaceColor:'#C8B560',bg:'#F8F8F0',objHalfW:13,
-   infoMoving:'Espacements <strong>égaux</strong> → vitesse constante → <strong>MRU</strong>'},
+   infoMoving:'La trajectoire est une droite.<BR>Espacements <strong>égaux</strong> → valeur de la vitesse constante → <strong>MRU</strong>'},
   {type:'linear',shape:'bille',x0:45,y:110,vx:130,ax:-58,v0:130,fMax:50,
    forces:{P:{dy:36},R:{dy:-36}},surfaceY:123,surface:'tapis rugueux',
    surfaceColor:'#8B6040',bg:'#F5F0EC',objHalfW:13,
-   infoMoving:'Espacements <strong>décroissants</strong> → vitesse diminue → <strong>MRA</strong>'},
+   infoMoving:'La trajectoire est une droite.<BR>Espacements <strong>décroissants</strong> → la valeur de la vitesse diminue → <strong>MRA</strong>'},
   {type:'inclined',shape:'chariot',angle:30,v0:0,a:40,vScale:0.35,
    bg:'#F0F4F8',surfaceColor:'#8B7355',forces:{P:{mag:52},R:{mag:45}},
-   infoMoving:'Espacements <strong>croissants</strong> → vitesse augmente → <strong>MRA</strong>'},
+   infoMoving:'La trajectoire est une droite.<BR>Espacements <strong>croissants</strong> → la valeur de la vitesse augmente → <strong>MRA</strong>'},
 ];
 const STATE=CONFIGS.map(()=>({
   t:0,playing:false,speed:1,chrono:false,chronoPoints:[],
@@ -884,8 +884,9 @@ function drawInclined(i,ctx,cfg,st,can){
 function updateInfo(i,st){
   const cfg=CONFIGS[i],el=document.getElementById('info'+i);
   if(!el)return;
-  if(st.stopped){el.innerHTML='<strong>Terminé</strong>Réinitialise pour recommencer.';return;}
-  el.innerHTML='<strong>En direct</strong>'+cfg.infoMoving;
+  if(!st.started)return;
+  if(st.stopped){el.innerHTML='<strong>Terminé</strong><br>Réinitialise pour recommencer.';return;}
+  el.innerHTML='<strong>En direct</strong><br>'+cfg.infoMoving;
 }
 function loop(i,ts){
   const st=STATE[i],cfg=CONFIGS[i];
